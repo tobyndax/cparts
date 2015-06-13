@@ -13,7 +13,6 @@ module.exports = Cparts =
       # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
     return unless panes = atom.workspace.getActivePane()
-    console.log panes
     # Register command that toggles this view
     @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:test': => @toggle()
     @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:deactivate': => @deactivate()
@@ -44,17 +43,22 @@ module.exports = Cparts =
       @changedFile()
 
   changedFile: () ->
-
     if not toggleState
       return
 
+    #destroy the counterpart view
+    return unless pane = atom.workspace.getPanes()
+
+    if pane.length isnt 1
+      otherPanes = pane[1..]
+      for pane in otherPanes
+        pane.destroy()
+
+    #get editor
+    return unless editor = atom.workspace.getActiveTextEditor()
+
+    console.log editor.getPath()
     console.log 'Changed active item'
     return unless pane = atom.workspace.getPanes()
     if pane.length is 1
-      secondPane = pane[0].splitRight()
-    else
-      secondPane = pane[1]
-    secondPane.activate()
-
-    console.log pane[0]
-    console.log secondPane
+      atom.workspace.open(editor.getPath(),activatePane:false,split:'right')
