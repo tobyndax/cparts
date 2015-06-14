@@ -45,7 +45,7 @@ module.exports = Cparts =
   changedFile: () ->
     if not toggleState
       return
-
+    ###
     #destroy the counterpart view
     return unless pane = atom.workspace.getPanes()
 
@@ -54,11 +54,20 @@ module.exports = Cparts =
       for pane in otherPanes
         pane.destroy()
 
+    ###
     #get editor
     return unless editor = atom.workspace.getActiveTextEditor()
 
     console.log editor.getPath()
     console.log 'Changed active item'
     return unless pane = atom.workspace.getPanes()
+    ###
     if pane.length is 1
       atom.workspace.open(editor.getPath(),activatePane:false,split:'right')
+    else
+    ###
+    atom.workspace.open(editor.getPath(),activatePane:true,split:'right')
+    testing = atom.workspace.getPanes()
+    console.log testing
+    if testing[1].length > 1
+      testing[1].destroy()
