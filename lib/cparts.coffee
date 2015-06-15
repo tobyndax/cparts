@@ -1,7 +1,9 @@
 CpartsView = require './cparts-view'
 {CompositeDisposable} = require 'atom'
 toggleState = false
-
+title = null
+lastEditor = null
+num = 0
 
 module.exports = Cparts =
   cpartsView: null
@@ -21,6 +23,7 @@ module.exports = Cparts =
 
   deactivate: ->
     @subscriptions.dispose()
+    title = null
     return unless pane = atom.workspace.getPanes()
     if pane.length is 1
       #
@@ -45,29 +48,24 @@ module.exports = Cparts =
   changedFile: () ->
     if not toggleState
       return
-    ###
-    #destroy the counterpart view
-    return unless pane = atom.workspace.getPanes()
 
-    if pane.length isnt 1
-      otherPanes = pane[1..]
-      for pane in otherPanes
-        pane.destroy()
-
-    ###
     #get editor
     return unless editor = atom.workspace.getActiveTextEditor()
-
     console.log editor.getPath()
     console.log 'Changed active item'
-    return unless pane = atom.workspace.getPanes()
-    ###
-    if pane.length is 1
-      atom.workspace.open(editor.getPath(),activatePane:false,split:'right')
-    else
-    ###
-    atom.workspace.open(editor.getPath(),activatePane:true,split:'right')
-    testing = atom.workspace.getPanes()
-    console.log testing
-    if testing[1].length > 1
-      testing[1].destroy()
+
+    uri = "cparts://editor/#{editor.id}"
+    console.log uri
+    tempTitle ="#{editor.id}"
+
+    previousActivePane = atom.workspace.getActivePane()
+    options =
+      searchAllPanes: false
+      split:'right'
+    filePath = atom.workspace.getActiveTextEditor().getPath()
+    atom.workspace.open(filePath, options).done (newEditor) ->
+      console.log lastEditor
+      if lastEditor
+        lastEditor.destroy()
+      lastEditor = newEditor
+      return
