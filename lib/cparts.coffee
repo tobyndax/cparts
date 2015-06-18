@@ -46,7 +46,11 @@ module.exports = Cparts =
 
     #get editor
     return unless editor = atom.workspace.getActiveTextEditor()
-
+    ###
+    if editor is lastEditor
+      console.log "lastEditor is now active editor"
+      console.log atom.workspace.getActiveTextEditor().getPath()
+    ###
     #Create editor uri
     uri = "cparts://editor/#{editor.id}"
     console.log uri
@@ -57,9 +61,10 @@ module.exports = Cparts =
       searchAllPanes: false
       split:'right'
     filePath = atom.workspace.getActiveTextEditor().getPath()
+    console.log filePath
     #Recieve texteditor promise and destroy lastEditor
     atom.workspace.open(filePath, options).done (newEditor) ->
-      if lastEditor
+      if lastEditor and lastEditor isnt newEditor
         lastEditor.destroy()
       lastEditor = newEditor
       #activate whichever pane was active before.
