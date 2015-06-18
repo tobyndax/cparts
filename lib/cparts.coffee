@@ -2,6 +2,7 @@ CpartsView = require './cparts-view'
 {CompositeDisposable} = require 'atom'
 toggleState = false
 lastEditor = null
+panes = null
 num = 0
 
 module.exports = Cparts =
@@ -44,24 +45,21 @@ module.exports = Cparts =
     if not toggleState
       return
 
-    #get editor
-    return unless editor = atom.workspace.getActiveTextEditor()
-    ###
-    if editor is lastEditor
-      console.log "lastEditor is now active editor"
-      console.log atom.workspace.getActiveTextEditor().getPath()
-    ###
+    #get editor and save previous active pane
+    return unless editor = panes.getActiveItem()
+    previousActivePane = atom.workspace.getActivePane()
+
     #Create editor uri
     uri = "cparts://editor/#{editor.id}"
     console.log uri
 
-    previousActivePane = atom.workspace.getActivePane()
-
+    #setup options for fileopening
     options =
       searchAllPanes: false
       split:'right'
-    filePath = atom.workspace.getActiveTextEditor().getPath()
+    filePath = editor.getPath()
     console.log filePath
+
     #Recieve texteditor promise and destroy lastEditor
     atom.workspace.open(filePath, options).done (newEditor) ->
       if lastEditor and lastEditor isnt newEditor
