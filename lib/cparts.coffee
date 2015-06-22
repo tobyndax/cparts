@@ -3,7 +3,7 @@ CpartsView = require './cparts-view'
 toggleState = false
 lastEditor = null
 panes = null
-num = 0
+subscriptions = null
 
 module.exports = Cparts =
   cpartsView: null
@@ -13,33 +13,47 @@ module.exports = Cparts =
 
     #Add subscriptions
     @subscriptions = new CompositeDisposable
-    return unless panes = atom.workspace.getActivePane()
     # Register command that toggles this view
+    @activateCommands()
+
+  activateCommands: () ->
     @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:test': => @toggle()
+
+  activatePane: () ->
+    return unless panes = atom.workspace.getActivePane()
+    console.log panes
     @subscriptions.add panes.observeActiveItem => @changedFile()
+    @subscriptions.add panes.onDidDestroy => @paneDestroyed()
 
-
-  deactivate: ->
+  deactivatePane: () ->
     @subscriptions.dispose()
-    lastEditor = null
+    @activateCommands()
+
+  deactivate: () ->
     return unless pane = atom.workspace.getPanes()
-    if pane.length is 1
-      #
-    else
-      secondPane = pane[1]
-      secondPane.destroy()
+    if lastEditor
+      lastEditor.destroy()
+    lastEditor = null
+    panes = null
+
+  paneDestroyed: () ->
+    @deactivatePane()
+    @activatePane()
+
 
   toggle: () ->
 
-    toggleState = not toggleState
-
-    if not toggleState
-      return unless pane = atom.workspace.getPanes()
-      if pane.length isnt 1
-        secondPane = pane[1]
-        secondPane.destroy()
+    if toggleState
+      @deactivatePane()
+      @deactivate()
+      toggleState = false;
     else
+      @activatePane(null)
+      toggleState = true;
       @changedFile()
+
+    console.log "State: "
+    console.log toggleState
 
   changedFile: () ->
     if not toggleState
