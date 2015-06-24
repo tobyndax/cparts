@@ -9,37 +9,57 @@ module.exports = Cparts =
   cpartsView: null
   subscriptions: null
 
-  activate: (state) ->
+#-------------------------------------------------------------------
 
-    #Add subscriptions
+  activate: (state) ->
+    #Create subscription
     @subscriptions = new CompositeDisposable
-    # Register command that toggles this view
+    #Activate command that toggles this view
     @activateCommands()
+
+#-------------------------------------------------------------------
 
   activateCommands: () ->
     @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:test': => @toggle()
 
+#-------------------------------------------------------------------
+
   activatePane: () ->
+    #get new current pane to track
     return unless panes = atom.workspace.getActivePane()
-    console.log panes
+    #activate subscriptions
     @subscriptions.add panes.observeActiveItem => @changedFile()
     @subscriptions.add panes.onDidDestroy => @paneDestroyed()
 
+#-------------------------------------------------------------------
+
   deactivatePane: () ->
+    #Stop tracking panes by removing subscriptions, readd keycommands
     @subscriptions.dispose()
     @activateCommands()
 
+#-------------------------------------------------------------------
+
   deactivate: () ->
+    #On deactivation destroy lastEditor
+    #   subscriptions.dispose()
+    #Make sure any pane exists.
     return unless pane = atom.workspace.getPanes()
     if lastEditor
-      lastEditor.destroy()
+      try
+        lastEditor.destroy()
+      catch
+        console.log "Destroy issue in deactivate"
     lastEditor = null
     panes = null
+
+#-------------------------------------------------------------------
 
   paneDestroyed: () ->
     @deactivatePane()
     @activatePane()
 
+#-------------------------------------------------------------------
 
   toggle: () ->
 
@@ -52,8 +72,7 @@ module.exports = Cparts =
       toggleState = true;
       @changedFile()
 
-    console.log "State: "
-    console.log toggleState
+#-------------------------------------------------------------------
 
   changedFile: () ->
     if not toggleState
@@ -76,8 +95,12 @@ module.exports = Cparts =
 
     #Recieve texteditor promise and destroy lastEditor
     atom.workspace.open(filePath, options).done (newEditor) ->
-      if lastEditor and lastEditor isnt newEditor
-        lastEditor.destroy()
+      editor = atom.workspace.getActiveTextEditor()
+      if lastEditor and lastEditor isnt newEditor and lastEditor isnt editor
+        try
+          lastEditor.destroy()
+        catch
+          console.log "LastEditor.destroy, did not workout properly"
       lastEditor = newEditor
       #activate whichever pane was active before.
       previousActivePane.activate()
