@@ -1,5 +1,7 @@
-CpartsView = require './cparts-view'
+
 {CompositeDisposable} = require 'atom'
+fs = require 'fs-plus'
+
 toggleState = false
 lastEditor = null
 panes = null
@@ -80,6 +82,12 @@ module.exports = Cparts =
 
     #get editor and save previous active pane
     return unless editor = panes.getActiveItem()
+    #make sure it is actually a editor, not something else.
+    try
+      editor.getPath()
+    catch
+      return
+
     previousActivePane = atom.workspace.getActivePane()
 
     #Create editor uri
