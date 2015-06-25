@@ -51,7 +51,7 @@ module.exports = Cparts =
       try
         lastEditor.destroy()
       catch
-        console.log "Destroy issue in deactivate"
+        console.log "LastEditor.destroy issue in changedFile"
     lastEditor = null
     panes = null
 
@@ -108,7 +108,7 @@ module.exports = Cparts =
         try
           lastEditor.destroy()
         catch
-          console.log "LastEditor.destroy, did not workout properly"
+          console.log "LastEditor.destroy issue in changedFile"
       lastEditor = newEditor
       #activate whichever pane was active before.
       previousActivePane.activate()
