@@ -1,7 +1,7 @@
 
 {CompositeDisposable} = require 'atom'
-fs = require 'fs-plus'
-
+{File} = require 'atom'
+#fs = require 'fs-plus'
 toggleState = false
 lastEditor = null
 panes = null
@@ -99,10 +99,21 @@ module.exports = Cparts =
       searchAllPanes: false
       split:'right'
     filePath = editor.getPath()
-    console.log filePath
+    extension = filePath.match /\.[^/.]+$/
+    #we need something to find different extensions here.
+    if extension[0] isnt ".c"
+      return
+
+    newFilePath = filePath.replace /\.[^/.]+$/ , ".h"
+
+    file = new File(newFilePath,false)
+    console.log file.existsSync()
+
+    if not file.existsSync()
+      return
 
     #Recieve texteditor promise and destroy lastEditor
-    atom.workspace.open(filePath, options).done (newEditor) ->
+    atom.workspace.open(newFilePath, options).done (newEditor) ->
       editor = atom.workspace.getActiveTextEditor()
       if lastEditor and lastEditor isnt newEditor and lastEditor isnt editor
         try
