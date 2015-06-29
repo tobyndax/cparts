@@ -10,7 +10,6 @@ subscriptions = null
 module.exports = Cparts =
   cpartsView: null
   subscriptions: null
-
 #-------------------------------------------------------------------
 
   activate: (state) ->
@@ -94,14 +93,11 @@ module.exports = Cparts =
     uri = "cparts://editor/#{editor.id}"
     console.log uri
 
-    #setup options for fileopening
-    options =
-      searchAllPanes: false
-      split:'right'
     filePath = editor.getPath()
     extension = filePath.match /\.[^/.]+$/
+
     #we need something to find different extensions here.
-    if extension[0] isnt ".c"
+    if extension[0] isnt ".cc"
       return
 
     newFilePath = filePath.replace /\.[^/.]+$/ , ".h"
@@ -111,6 +107,11 @@ module.exports = Cparts =
 
     if not file.existsSync()
       return
+
+    #setup options for fileopening
+    options =
+      searchAllPanes: false
+      split:'right'
 
     #Recieve texteditor promise and destroy lastEditor
     atom.workspace.open(newFilePath, options).done (newEditor) ->
