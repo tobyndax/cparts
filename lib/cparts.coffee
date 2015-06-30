@@ -95,6 +95,26 @@ module.exports = Cparts =
 
     filePath = editor.getPath()
     extension = filePath.match /\.[^/.]+$/
+    ###
+    
+    We can use atom.project.getPaths() to get each top path for all disjoint
+    directories in the project. (Even when files haven't been opened as a project)
+    Then using fs-plus traverseTree(sync) to apply our regexp to every file in
+    the project, returning the file when a match is made. traverseTree calls a
+    function (onFile) that takes one argument the absolute path to the file, so
+    that should work fine, however I am not certain about returning values from it.
+    However, since it's always a question of exactly one instance a localscope
+    parameter could be set to circumvent the return issue (if there is one)
+
+    We need to detect the triggering file endings, preferably with a regexp,
+    and incorperate it into the config file so end-users can use it.
+    Maybe we need two search functions one which finds source files, and one
+    which finds header files. searchSource and searchHeader. Also regexps.
+
+    We definitely need a function which builds regexps from the config file.
+
+    ###
+
 
     #we need something to find different extensions here.
     if extension[0] isnt ".cc"
@@ -109,13 +129,12 @@ module.exports = Cparts =
     if not file.existsSync()
       return
 
-    #setup options for fileopening
-    options =
+    fileOptions =
       searchAllPanes: false
       split:'right'
 
     #Recieve texteditor promise and destroy lastEditor
-    atom.workspace.open(newFilePath, options).done (newEditor) ->
+    atom.workspace.open(newFilePath, fileOptions).done (newEditor) ->
       editor = atom.workspace.getActiveTextEditor()
       if lastEditor and lastEditor isnt newEditor and lastEditor isnt editor
         try
@@ -123,6 +142,5 @@ module.exports = Cparts =
         catch
           console.log "LastEditor.destroy issue in changedFile"
       lastEditor = newEditor
-      #activate whichever pane was active before.
       previousActivePane.activate()
       return
