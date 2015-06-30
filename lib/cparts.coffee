@@ -1,7 +1,7 @@
 
 {CompositeDisposable} = require 'atom'
 {File} = require 'atom'
-#fs = require 'fs-plus'
+fs = require 'fs-plus'
 toggleState = false
 lastEditor = null
 panes = null
@@ -21,7 +21,7 @@ module.exports = Cparts =
 #-------------------------------------------------------------------
 
   activateCommands: () ->
-    @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:test': => @toggle()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:toggle': => @toggle()
 
 #-------------------------------------------------------------------
 
@@ -104,6 +104,7 @@ module.exports = Cparts =
 
     file = new File(newFilePath,false)
     console.log file.existsSync()
+    console.log atom.project
 
     if not file.existsSync()
       return

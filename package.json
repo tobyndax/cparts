@@ -2,11 +2,11 @@
   "name": "cparts",
   "main": "./lib/cparts",
   "version": "0.0.0",
-  "description": "A short description of your package",
-  "keywords": [
+  "description": "A helper for c-like languages which automatically shows corresponding header file in a split pane",
+  "keywords": ["header","counterpart","counterparts","switch","source"
   ],
   "activationCommands": {
-    "atom-workspace": "cparts:test"
+    "atom-workspace": "cparts:toggle"
   },
   "repository": "https://github.com/atom/cparts",
   "license": "MIT",
@@ -14,5 +14,6 @@
     "atom": ">=0.174.0 <2.0.0"
   },
   "dependencies": {
+    "fs-plus": "2.x"
   }
 }
