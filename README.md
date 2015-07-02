@@ -1,17 +1,6 @@
 # cparts
 Atom plugin for automatically showing counterparts when working with header files in C,C++ and Objective-C
 
-Setup
-==
-This package requires fs-plus
-https://github.com/atom/fs-plus
-which in turn needs npm
-http://blog.npmjs.org/post/85484771375/how-to-install-npm
+ctrl-alt-o to toggle on and off. 
 
-Mac
---
-(Assuming brew)
-
-```brew install npm ```
-
-```npm install fs-plus```
+Currently the extensions are hardcoded into the code and not changable from the config file. 
