@@ -8,7 +8,7 @@
   "activationCommands": {
     "atom-workspace": "cparts:toggle"
   },
-  "repository": "https://github.com/atom/cparts",
+  "repository": "https://github.com/tobyndax/cparts",
   "license": "MIT",
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
