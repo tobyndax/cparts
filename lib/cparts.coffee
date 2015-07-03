@@ -6,6 +6,7 @@ toggleState = false
 lastEditor = null
 panes = null
 subscriptions = null
+commands = null
 main = null
 counterpart = null
 
@@ -17,30 +18,36 @@ module.exports = Cparts =
 
   activate: (state) ->
     #Create subscription
-    @subscriptions = new CompositeDisposable
+    subscriptions = new CompositeDisposable
+    commands = new CompositeDisposable
     #Activate command that toggles this view
     @activateCommands()
 
 #-------------------------------------------------------------------
 
   activateCommands: () ->
-    @subscriptions.add atom.commands.add 'atom-workspace', 'cparts:toggle': => @toggle()
+    console.log "Activating commands "
+    commands.add atom.commands.add 'atom-workspace', 'cparts:toggle': => @toggle()
 
 #-------------------------------------------------------------------
 
   activatePane: () ->
     #get new current pane to track
+    @deactivatePane()
+    console.log "Activating Pane"
     return unless panes = atom.workspace.getActivePane()
+    console.log  panes
     #activate subscriptions
-    @subscriptions.add panes.observeActiveItem => @changedFile()
-    @subscriptions.add panes.onDidDestroy => @paneDestroyed()
+    subscriptions.add panes.observeActiveItem => @test()
+    #subscriptions.add panes.onDidDestroy => @paneDestroyed()
 
 #-------------------------------------------------------------------
 
   deactivatePane: () ->
     #Stop tracking panes by removing subscriptions, readd keycommands
-    @subscriptions.dispose()
-    @activateCommands()
+    console.log "Deactivating pane"
+    subscriptions.clear()
+    subscriptions.dispose()
 
 #-------------------------------------------------------------------
 
@@ -58,21 +65,29 @@ module.exports = Cparts =
 #-------------------------------------------------------------------
 
   paneDestroyed: () ->
+    console.log "paneDestroyed"
     @deactivatePane()
     @activatePane()
 
 #-------------------------------------------------------------------
 
+  test: () ->
+    console.log "test"
+
   toggle: () ->
 
     if toggleState
+      toggleState = false;
       @deactivatePane()
       @deactivate()
-      toggleState = false;
+      console.log "toggle false"
+      console.log subscriptions
     else
-      @activatePane(null)
       toggleState = true;
-      @changedFile()
+      return unless panes = atom.workspace.getActivePane()
+      @test()
+      @activatePane()
+      console.log "toggle true"
 
 #-------------------------------------------------------------------
 
@@ -101,6 +116,7 @@ module.exports = Cparts =
 #-------------------------------------------------------------------
 
   changedFile: () ->
+
     if not toggleState
       return
 
