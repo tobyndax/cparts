@@ -114,7 +114,8 @@ module.exports = Cparts =
 
     previousActivePane = atom.workspace.getActivePane()
 
-    filePath = editor.getPath()
+    return unless filePath = editor.getPath()
+
     return unless extension = filePath.match /\.[^/.]+$/
     if extension[0].match /\.(c|cc|cC|cpp|CPP)$/gim
       console.log "source detected"
