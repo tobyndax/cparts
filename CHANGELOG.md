@@ -1,3 +1,7 @@
+## 0.1.3 - Bugfix
+  A bug were when the editor was destroyed non saved changes were also destroyed
+  the fix now saves files through TextEditor::Save() before destroying.
+
 ## 0.1.2 - Bugfixes
   A bug were toggling the program with a source or a header selected sent the
   package into an unbreakable loop has been fixed.

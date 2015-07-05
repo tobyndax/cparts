@@ -49,6 +49,7 @@ module.exports = Cparts =
     return unless pane = atom.workspace.getPanes()
     if lastEditor
       try
+        lastEditor.save()
         lastEditor.destroy()
       catch
         console.debug "LastEditor.destroy issue in changedFile"
@@ -151,6 +152,7 @@ module.exports = Cparts =
       editor = atom.workspace.getActiveTextEditor()
       if lastEditor and lastEditor isnt newEditor and lastEditor isnt editor
         try
+          lastEditor.save()
           lastEditor.destroy()
         catch
           console.error "LastEditor.destroy issue in changedFile"
