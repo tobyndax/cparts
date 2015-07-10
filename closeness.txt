@@ -1,0 +1,20 @@
+#prototype of function from mobile
+
+Closeness = (string1,string2) ->
+  arr = string1.split('/')
+  arr2 = string2.split('/')
+  len = Math.min(arr.length,arr2.length)
+  closeness = 0
+  for index in [0..len] 
+    if arr[index] is arr2[index]
+      closeness++
+
+  return closeness
+  
+string1 = "usr/prog1/header/yo.txt"
+string2 = "usr/prog1/source/yo.txt"
+string3 = "usr/prog2/source/yo.txt"   
+alert [Closeness(string1,string2),Closeness(string1,string3)]
+
+
+
