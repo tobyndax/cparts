@@ -5,18 +5,32 @@ fs = require 'fs-plus'
 toggleState = false
 lastEditor = null
 panes = null
+absMain = null
 main = null
 counterpart = null
-
+self = null
 
 module.exports = Cparts =
   observePane: null
   commands: null
   destroyedPane: null
+
+  closeness: (string1,string2) ->
+    arr = string1.split('/')
+    arr2 = string2.split('/')
+    len = Math.min(arr.length,arr2.length)
+    equality = 0
+    for index in [0..len]
+      if arr[index] is arr2[index]
+        equality++
+
+    return equality
+
 #-------------------------------------------------------------------
 
   activate: (state) ->
     @activateCommands()
+    self = this
 
 #-------------------------------------------------------------------
 
@@ -80,27 +94,47 @@ module.exports = Cparts =
 
 #-------------------------------------------------------------------
 
-   searchHeader: (absPath) ->
+  closeness: (string1,string2) ->
+    if string1 is null
+      string1 = ""
+    if string2 is null
+      string2 = ""
+
+    arr = string1.split('/')
+    arr2 = string2.split('/')
+    len = Math.min(arr.length,arr2.length)
+    equality = 0
+    for index in [0..len]
+      if arr[index] is arr2[index]
+        equality++
+
+    return equality
+
+#-------------------------------------------------------------------
+
+  searchHeader: (absPath) ->
+
      fileName = absPath.match /[^\\/]+$/
      noExt = fileName[0].replace /\.[^/.]+$/ , ""
 
      if main is noExt
        if absPath.match /\.(h|hh|HH|hpp|HPP)$/gim
-         counterpart = absPath
-         return true
+         if (self.closeness(absPath,absMain) > self.closeness(counterpart,absMain))
+           counterpart = absPath
      return true
 
 #-------------------------------------------------------------------
 
-    searchSource: (absPath) ->
-      fileName = absPath.match /[^\\/]+$/
-      noExt = fileName[0].replace /\.[^/.]+$/ , ""
+  searchSource: (absPath) ->
 
-      if main is noExt
-        if absPath.match /\.(c|cc|cC|cpp|CPP)$/gim
+    fileName = absPath.match /[^\\/]+$/
+    noExt = fileName[0].replace /\.[^/.]+$/ , ""
+
+    if main is noExt
+      if absPath.match /\.(c|cc|cC|cpp|CPP)$/gim
+        if (self.closeness(absPath,absMain)>self.closeness(counterpart,absMain))
           counterpart = absPath
-          return true
-      return true
+    return true
 
 #-------------------------------------------------------------------
 
@@ -118,16 +152,19 @@ module.exports = Cparts =
     previousActivePane = atom.workspace.getActivePane()
 
     return unless filePath = editor.getPath()
+    counterpart = null
 
     return unless extension = filePath.match /\.[^/.]+$/
     if extension[0].match /\.(c|cc|cC|cpp|CPP)$/gim
       console.debug "source detected"
+      absMain = editor.getPath()
       main = editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTreeSync(path,@searchHeader)
       #try and find file with header extensions.
     else if extension[0].match /\.(h|hh|HH|hpp|HPP)$/gim
       console.debug "header detected"
+      absMain = editor.getPath()
       main = editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTreeSync(path,@searchSource)
