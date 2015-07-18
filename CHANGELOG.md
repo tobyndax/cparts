@@ -1,3 +1,7 @@
+## 0.1.5 - Bugfix
+  Using the synchronous version of the tree traversal
+  led to a EPERM error. This patch switches to the asynchronous version.
+
 ## 0.1.4 - Feature
   A new feature where the package now measures how many steps into the path
   the source and the header shares and when multiple files match the file name it now selects the one closest to the triggering file. (For multiple projects in the same window/workspace with for example main.cc and main.h in each project)
