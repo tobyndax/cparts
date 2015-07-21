@@ -2,17 +2,18 @@
 {CompositeDisposable} = require 'atom'
 {File} = require 'atom'
 fs = require 'fs-plus'
-toggleState = false
-lastEditor = null
-panes = null
-absMain = null
-main = null
-counterpart = null
+
 self = null
-editor = null
-previousActivePane = null
 
 module.exports = Cparts =
+  panes: null
+  counterpart: null
+  absMain: null
+  main: null
+  lastEditor: null
+  editor: null
+  previousActivePane: null
+  toggleState: false
   observePane: null
   commands: null
   destroyedPane: null
@@ -45,9 +46,9 @@ module.exports = Cparts =
 
   activatePane: () ->
     console.debug "Activating Pane"
-    return unless panes = atom.workspace.getActivePane()
-    @destroyedPane = panes.onDidDestroy => @paneDestroyed()
-    @observePane = panes.observeActiveItem => @changedFile()
+    return unless @panes = atom.workspace.getActivePane()
+    @destroyedPane = @panes.onDidDestroy => @paneDestroyed()
+    @observePane = @panes.observeActiveItem => @changedFile()
 #-------------------------------------------------------------------
 
   deactivatePane: () ->
@@ -63,19 +64,19 @@ module.exports = Cparts =
   deactivate: () ->
     #Make sure any pane exists.
     return unless pane = atom.workspace.getPanes()
-    if lastEditor
+    if self.lastEditor
       try
-        lastEditor.save()
-        lastEditor.destroy()
+        self.lastEditor.save()
+        self.lastEditor.destroy()
       catch
-        console.debug "LastEditor.destroy issue in changedFile"
-    lastEditor = null
+        console.debug "self.lastEditor.destroy issue in changedFile"
+    self.lastEditor = null
 
 #-------------------------------------------------------------------
 
   paneDestroyed: () ->
     console.debug "paneDestroyed"
-    lastEditor = null
+    self.lastEditor = null
     @deactivatePane()
     @activatePane()
 
@@ -83,14 +84,14 @@ module.exports = Cparts =
 
   toggle: () ->
 
-    if toggleState
-      toggleState = false;
+    if @toggleState
+      @toggleState = false;
       @deactivatePane()
       @deactivate()
       console.debug "toggle false"
     else
-      toggleState = true;
-      return unless panes = atom.workspace.getActivePane()
+      @toggleState = true;
+      return unless @panes = atom.workspace.getActivePane()
       @activatePane()
       console.debug "toggle true"
 
@@ -119,10 +120,10 @@ module.exports = Cparts =
      fileName = absPath.match /[^\\/]+$/
      noExt = fileName[0].replace /\.[^/.]+$/ , ""
 
-     if main is noExt
+     if self.main is noExt
        if absPath.match /\.(h|hh|HH|hpp|HPP)$/gim
-         if (self.closeness(absPath,absMain) > self.closeness(counterpart,absMain))
-           counterpart = absPath
+         if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
+           self.counterpart = absPath
      return true
 
 #-------------------------------------------------------------------
@@ -131,42 +132,42 @@ module.exports = Cparts =
 
     fileName = absPath.match /[^\\/]+$/
     noExt = fileName[0].replace /\.[^/.]+$/ , ""
-    if main is noExt
+    if self.main is noExt
       if absPath.match /\.(c|cc|cC|cpp|CPP)$/gim
-        if (self.closeness(absPath,absMain) > self.closeness(counterpart,absMain))
-          counterpart = absPath
+        if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
+          self.counterpart = absPath
     return true
 
 #-------------------------------------------------------------------
 
   changedFile: () ->
 
-    if not toggleState
+    if not @toggleState
       return
-    #get editor and save previous active pane
+    #get @editor and save previous active pane
     try
-      return unless editor = panes.getActiveItem()
-      editor.getPath() #call a editor member function to be certain (should be a typeof comparison)
+      return unless @editor = @panes.getActiveItem()
+      @editor.getPath() #call a @editor member function to be certain (should be a typeof comparison)
     catch
       return
 
-    return unless previousActivePane = atom.workspace.getActivePane()
+    return unless @previousActivePane = atom.workspace.getActivePane()
 
-    return unless filePath = editor.getPath()
-    counterpart = null
+    return unless filePath = @editor.getPath()
+    @counterpart = null
 
     return unless extension = filePath.match /\.[^/.]+$/
     if extension[0].match /\.(c|cc|cC|cpp|CPP)$/gim
       console.debug "source detected"
-      absMain = editor.getPath()
-      main = editor.getTitle().replace /\.[^/.]+$/ , ""
+      @absMain = @editor.getPath()
+      @main = @editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchHeader,@searchHeader,@openFile)
       #try and find file with header extensions.
     else if extension[0].match /\.(h|hh|HH|hpp|HPP)$/gim
       console.debug "header detected"
-      absMain = editor.getPath()
-      main = editor.getTitle().replace /\.[^/.]+$/ , ""
+      @absMain = @editor.getPath()
+      @main = @editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchSource,@searchSource,@openFile)
       #try and find file with source extensions.
@@ -174,11 +175,11 @@ module.exports = Cparts =
       return
 
   openFile: () ->
-    #Create editor uri
-    uri = "cparts://editor/#{editor.id}"
+    #Create @editor uri
+    uri = "cparts://editor/#{self.editor.id}"
 
     #Ensure existence of file.
-    file = new File(counterpart,false)
+    file = new File(self.counterpart,false)
     if not file.existsSync()
       return
 
@@ -186,14 +187,14 @@ module.exports = Cparts =
       searchAllPanes: false
       split:'right'
 
-    #Recieve texteditor promise and destroy lastEditor
-    atom.workspace.open(counterpart, fileOptions).done (newEditor) ->
-      editor = atom.workspace.getActiveTextEditor()
-      if lastEditor and lastEditor isnt newEditor and lastEditor isnt editor
+    #Recieve texteditor promise and destroy self.lastEditor
+    atom.workspace.open(self.counterpart, fileOptions).done (newEditor) ->
+      self.editor = atom.workspace.getActiveTextEditor()
+      if self.lastEditor and self.lastEditor isnt newEditor and self.lastEditor isnt self.editor
         try
-          lastEditor.save()
-          lastEditor.destroy()
+          self.lastEditor.save()
+          self.lastEditor.destroy()
         catch
-          console.error "LastEditor.destroy issue in changedFile"
-      lastEditor = newEditor
-      previousActivePane.activate()
+          console.error "self.lastEditor.destroy issue in changedFile"
+      self.lastEditor = newEditor
+      self.previousActivePane.activate()
