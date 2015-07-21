@@ -18,6 +18,12 @@ module.exports = Cparts =
   commands: null
   destroyedPane: null
 
+  config:
+    headerRegex:
+      type: 'string'
+      default: "/\.(h|hh|HH|hpp|HPP)$/gim"
+      description: "regex for header extensions"
+
   closeness: (string1,string2) ->
     arr = string1.split('/')
     arr2 = string2.split('/')
