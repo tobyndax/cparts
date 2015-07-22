@@ -1,4 +1,3 @@
-
 {CompositeDisposable} = require 'atom'
 {File} = require 'atom'
 fs = require 'fs-plus'
@@ -15,14 +14,37 @@ module.exports = Cparts =
   previousActivePane: null
   toggleState: false
   observePane: null
-  commands: null
+  subscriptions: null
   destroyedPane: null
+  g_headerRegEx: null
+  g_sourceRegEx: null
 
   config:
     headerRegex:
       type: 'string'
-      default: "/\.(h|hh|HH|hpp|HPP)$/gim"
-      description: "regex for header extensions"
+      default: "\.(h|hh|HH|hpp|HPP)$"
+      description: "regex for header extensions, suggested form \.(ext1|ext2|ext3)$"
+    headerFlags:
+      type: 'string'
+      default: "gim"
+      description: "flags used with the header regex"
+    sourceRegex:
+      type: 'string'
+      default: "\.(c|cc|cC|cpp|CPP)$"
+      description: "regex for source extensions, suggested form \.(ext1|ext2|ext3)"
+    sourceFlags:
+      type: 'string'
+      default: "gim"
+      description: "flags used with the source regex"
+
+  createRegex: () ->
+    hRegex = atom.config.get('cparts.headerRegex')
+    sRegex = atom.config.get('cparts.sourceRegex')
+    fhRegex = atom.config.get('cparts.headerFlags')
+    fsRegex = atom.config.get('cparts.sourceFlags')
+    @g_headerRegEx = new RegExp(hRegex,fhRegex)
+    @g_sourceRegEx = new RegExp(sRegex,fsRegex)
+    console.log "Regex"
 
   closeness: (string1,string2) ->
     arr = string1.split('/')
@@ -40,13 +62,15 @@ module.exports = Cparts =
   activate: (state) ->
     @activateCommands()
     self = this
+    @createRegex()
 
 #-------------------------------------------------------------------
 
   activateCommands: () ->
-    @commands = CompositeDisposable
+    @subscriptions = CompositeDisposable
     console.debug "Activating commands "
-    @commands = atom.commands.add 'atom-workspace', 'cparts:toggle': => @toggle()
+    @subscriptions = atom.commands.add 'atom-workspace', 'cparts:toggle': => @toggle()
+    @subscription = atom.config.onDidChange => @createRegex()
 
 #-------------------------------------------------------------------
 
@@ -127,7 +151,7 @@ module.exports = Cparts =
      noExt = fileName[0].replace /\.[^/.]+$/ , ""
 
      if self.main is noExt
-       if absPath.match /\.(h|hh|HH|hpp|HPP)$/gim
+       if absPath.match(self.g_headerRegEx)
          if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
            self.counterpart = absPath
      return true
@@ -139,7 +163,7 @@ module.exports = Cparts =
     fileName = absPath.match /[^\\/]+$/
     noExt = fileName[0].replace /\.[^/.]+$/ , ""
     if self.main is noExt
-      if absPath.match /\.(c|cc|cC|cpp|CPP)$/gim
+      if absPath.match(self.g_sourceRegEx)
         if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
           self.counterpart = absPath
     return true
@@ -163,14 +187,14 @@ module.exports = Cparts =
     @counterpart = null
 
     return unless extension = filePath.match /\.[^/.]+$/
-    if extension[0].match /\.(c|cc|cC|cpp|CPP)$/gim
+    if extension[0].match @g_sourceRegEx
       console.debug "source detected"
       @absMain = @editor.getPath()
       @main = @editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchHeader,@searchHeader,@openFile)
       #try and find file with header extensions.
-    else if extension[0].match /\.(h|hh|HH|hpp|HPP)$/gim
+    else if extension[0].match @g_headerRegEx
       console.debug "header detected"
       @absMain = @editor.getPath()
       @main = @editor.getTitle().replace /\.[^/.]+$/ , ""

@@ -1,3 +1,6 @@
+## 0.2.0 - Feature
+  RegExp for extensions are now configurable from atom config. 
+
 ## 0.1.5 - Bugfix
   Using the synchronous version of the tree traversal
   led to a EPERM error. This patch switches to the asynchronous version.
