@@ -1,5 +1,16 @@
+## 0.3.1 - Bugfix
+  On Windows the package would not do anything. This was due to a bug in the closeness
+  function. The closeness function is now modified slightly and is updating closest file
+  even on a equal distance away. This for Windows essential mean there is no sense of distance
+  and the last file searched (and matched) will be the file selected. Especially
+  troublesome in large projects. The closeness function will be suitably updated
+  for windows release at a future date.
+
+## 0.3.0 - Readme update
+  Updated the readme to better reflect the workings of the current version
+
 ## 0.2.0 - Feature
-  RegExp for extensions are now configurable from atom config. 
+  RegExp for extensions are now configurable from atom config.
 
 ## 0.1.5 - Bugfix
   Using the synchronous version of the tree traversal
