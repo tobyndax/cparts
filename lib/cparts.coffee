@@ -152,7 +152,7 @@ module.exports = Cparts =
 
      if self.main is noExt
        if absPath.match(self.g_headerRegEx)
-         if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
+         if (self.closeness(absPath,self.absMain) >= self.closeness(self.counterpart,self.absMain))
            self.counterpart = absPath
      return true
 
@@ -164,7 +164,7 @@ module.exports = Cparts =
     noExt = fileName[0].replace /\.[^/.]+$/ , ""
     if self.main is noExt
       if absPath.match(self.g_sourceRegEx)
-        if (self.closeness(absPath,self.absMain) > self.closeness(self.counterpart,self.absMain))
+        if (self.closeness(absPath,self.absMain) >= self.closeness(self.counterpart,self.absMain))
           self.counterpart = absPath
     return true
 
@@ -191,6 +191,7 @@ module.exports = Cparts =
       console.debug "source detected"
       @absMain = @editor.getPath()
       @main = @editor.getTitle().replace /\.[^/.]+$/ , ""
+      console.debug @main
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchHeader,@searchHeader,@openFile)
       #try and find file with header extensions.
