@@ -36,6 +36,10 @@ module.exports = Cparts =
       type: 'string'
       default: "gim"
       description: "flags used with the source regex"
+    enableDestroyWhenNoCounterpart:
+      type: 'boolean'
+      default: false
+      description: "Closes the right hand pane when no counterpart found"
 
   createRegex: () ->
     hRegex = atom.config.get('cparts.headerRegex')
@@ -89,11 +93,9 @@ module.exports = Cparts =
       @destroyedPane.dispose()
     catch
       console.error "didn't dispose properly"
-#-------------------------------------------------------------------
 
-  deactivate: () ->
-    #Make sure any pane exists.
-    return unless pane = atom.workspace.getPanes()
+#-------------------------------------------------------------------
+  destroyPane: () ->
     if self.lastEditor
       try
         self.lastEditor.save()
@@ -101,6 +103,12 @@ module.exports = Cparts =
       catch
         console.debug "self.lastEditor.destroy issue in changedFile"
     self.lastEditor = null
+#-------------------------------------------------------------------
+
+  deactivate: () ->
+    #Make sure any pane exists.
+    return unless pane = atom.workspace.getPanes()
+    @destroyPane()
 
 #-------------------------------------------------------------------
 
@@ -194,6 +202,7 @@ module.exports = Cparts =
       console.debug @main
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchHeader,@searchHeader,@openFile)
+
       #try and find file with header extensions.
     else if extension[0].match @g_headerRegEx
       console.debug "header detected"
@@ -201,17 +210,22 @@ module.exports = Cparts =
       @main = @editor.getTitle().replace /\.[^/.]+$/ , ""
       for path in atom.project.getPaths()
         fs.traverseTree(path,@searchSource,@searchSource,@openFile)
+
       #try and find file with source extensions.
     else
       return
 
   openFile: () ->
+
+    enableDestroyWhenNoCounterpart = atom.config.get('cparts.enableDestroyWhenNoCounterpart')
     #Create @editor uri
     uri = "cparts://editor/#{self.editor.id}"
 
     #Ensure existence of file.
     file = new File(self.counterpart,false)
     if not file.existsSync()
+      if enableDestroyWhenNoCounterpart
+        self.destroyPane()
       return
 
     fileOptions =

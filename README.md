@@ -12,4 +12,4 @@ On Linux and Mac the package deals with several files with the same name by sele
 the file closest to the triggering file. This is not implemented on Windows yet.
 
 #License
-Cparts is released under the MIT-license, the whole licence is provided in LICENSE, if you are unfamiliar with the MIT-license, please read through it before use.
+Cparts is released under the MIT-license, the whole license is provided in LICENSE, if you are unfamiliar with the MIT-license, please read through it before use.

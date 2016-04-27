@@ -1,3 +1,8 @@
+## 0.4.0 - Destroy Empty Panes
+  Option for destroying side pane when no counterpart found.
+  This will reset the pane sizing on the next found counterpart.
+  Disabled by default.
+
 ## 0.3.1 - Bugfix
   On Windows the package would not do anything. This was due to a bug in the closeness
   function. The closeness function is now modified slightly and is updating closest file
