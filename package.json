@@ -1,7 +1,7 @@
 {
   "name": "cparts",
   "main": "./lib/cparts",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "A helper for c-like languages which automatically shows corresponding header/source file in a split pane",
   "keywords": [
     "header",
